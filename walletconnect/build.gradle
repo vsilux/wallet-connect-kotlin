@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 apply plugin: 'kotlin-android'
 
-group='com.github.TrustWallet'
+group='com.github.vsilux'
 
 android {
     compileSdkVersion 28
