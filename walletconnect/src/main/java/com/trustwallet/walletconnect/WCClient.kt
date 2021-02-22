@@ -68,18 +68,19 @@ open class WCClient (
     var onFailure: (Throwable) -> Unit = { _ -> Unit}
     var onDisconnect: (code: Int, reason: String) -> Unit = { _, _ -> Unit }
     var onSessionRequest: (id: Long, peer: WCPeerMeta) -> Unit = { _, _ -> Unit }
-    var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
-    var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> Unit }
-    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> Unit }
+//    var onEthSign: (id: Long, message: WCEthereumSignMessage) -> Unit = { _, _ -> Unit }
+//    var onEthSignTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> Unit }
+//    var onEthSendTransaction: (id: Long, transaction: WCEthereumTransaction) -> Unit = { _, _ -> Unit }
     var onCustomRequest: (id: Long, payload: String) -> Unit = { _, _ -> Unit }
-    var onBnbTrade: (id: Long, order: WCBinanceTradeOrder) -> Unit = { _, _ -> Unit }
-    var onBnbCancel: (id: Long, order: WCBinanceCancelOrder) -> Unit = { _, _ -> Unit }
-    var onBnbTransfer: (id: Long, order: WCBinanceTransferOrder) -> Unit = { _, _ -> Unit }
-    var onBnbTxConfirm: (id: Long, order: WCBinanceTxConfirmParam) -> Unit = { _, _ -> Unit }
+//    var onBnbTrade: (id: Long, order: WCBinanceTradeOrder) -> Unit = { _, _ -> Unit }
+//    var onBnbCancel: (id: Long, order: WCBinanceCancelOrder) -> Unit = { _, _ -> Unit }
+//    var onBnbTransfer: (id: Long, order: WCBinanceTransferOrder) -> Unit = { _, _ -> Unit }
+//    var onBnbTxConfirm: (id: Long, order: WCBinanceTxConfirmParam) -> Unit = { _, _ -> Unit }
     var onGetAccounts: (id: Long) -> Unit = { _ -> Unit }
-    var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = {_, _ -> Unit }
-    var onOktSignTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = {_,_->Unit }
-    var onOktSendTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = { _, _->Unit }
+//    var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = {_, _ -> Unit }
+//    var onOktSignTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = {_,_->Unit }
+//    var onOktSendTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = { _, _->Unit }
+    var requestHandler: (id: Long, request: JsonRpcRequest<JsonArray>) -> Unit = { _, _->Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d(TAG, "<< websocket opened >>")
@@ -269,77 +270,78 @@ open class WCClient (
                     killSession()
                 }
             }
-            WCMethod.ETH_SIGN -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE))
-            }
-            WCMethod.ETH_PERSONAL_SIGN -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE))
-            }
-            WCMethod.ETH_SIGN_TYPE_DATA -> {
-                val params = gson.fromJson<List<String>>(request.params)
-                if (params.size < 2)
-                    throw InvalidJsonRpcParamsException(request.id)
-                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE))
-            }
-            WCMethod.ETH_SIGN_TRANSACTION -> {
-                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
-                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSignTransaction(request.id, param)
-            }
-            WCMethod.ETH_SEND_TRANSACTION ->{
-                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
-                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSendTransaction(request.id, param)
-            }
-            WCMethod.BNB_SIGN -> {
-                try {
-                    val order = gson.fromJson<List<WCBinanceCancelOrder>>(request.params)
-                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                    onBnbCancel(request.id, order)
-                } catch (e: NoSuchElementException) { }
-
-                try {
-                    val order = gson.fromJson<List<WCBinanceTradeOrder>>(request.params)
-                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                    onBnbTrade(request.id, order)
-                } catch (e: NoSuchElementException) {  }
-
-                try {
-                    val order = gson.fromJson<List<WCBinanceTransferOrder>>(request.params)
-                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                    onBnbTransfer(request.id, order)
-                } catch (e: NoSuchElementException) { }
-            }
-            WCMethod.OKT_SEND_TRANSACTION -> {
-                val param = gson.fromJson<List<WCOKExChainTransaction>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onOktSendTransaction(request.id,param)
-            }
-            WCMethod.OKT_SIGN_TRANSACTION -> {
-                val param = gson.fromJson<List<WCOKExChainTransaction>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onOktSignTransaction(request.id,param)
-
-            }
-            WCMethod.BNB_TRANSACTION_CONFIRM -> {
-                val param = gson.fromJson<List<WCBinanceTxConfirmParam>>(request.params)
-                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onBnbTxConfirm(request.id, param)
-            }
+            //            WCMethod.ETH_SIGN -> {
+//                val params = gson.fromJson<List<String>>(request.params)
+//                if (params.size < 2)
+//                    throw InvalidJsonRpcParamsException(request.id)
+//                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE))
+//            }
+//            WCMethod.ETH_PERSONAL_SIGN -> {
+//                val params = gson.fromJson<List<String>>(request.params)
+//                if (params.size < 2)
+//                    throw InvalidJsonRpcParamsException(request.id)
+//                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE))
+//            }
+//            WCMethod.ETH_SIGN_TYPE_DATA -> {
+//                val params = gson.fromJson<List<String>>(request.params)
+//                if (params.size < 2)
+//                    throw InvalidJsonRpcParamsException(request.id)
+//                onEthSign(request.id, WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE))
+//            }
+//            WCMethod.ETH_SIGN_TRANSACTION -> {
+//                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
+//                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onEthSignTransaction(request.id, param)
+//            }
+//            WCMethod.ETH_SEND_TRANSACTION ->{
+//                val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
+//                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onEthSendTransaction(request.id, param)
+//            }
+//            WCMethod.BNB_SIGN -> {
+//                try {
+//                    val order = gson.fromJson<List<WCBinanceCancelOrder>>(request.params)
+//                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                    onBnbCancel(request.id, order)
+//                } catch (e: NoSuchElementException) { }
+//
+//                try {
+//                    val order = gson.fromJson<List<WCBinanceTradeOrder>>(request.params)
+//                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                    onBnbTrade(request.id, order)
+//                } catch (e: NoSuchElementException) {  }
+//
+//                try {
+//                    val order = gson.fromJson<List<WCBinanceTransferOrder>>(request.params)
+//                            .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                    onBnbTransfer(request.id, order)
+//                } catch (e: NoSuchElementException) { }
+//            }
+//            WCMethod.OKT_SEND_TRANSACTION -> {
+//                val param = gson.fromJson<List<WCOKExChainTransaction>>(request.params)
+//                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onOktSendTransaction(request.id,param)
+//            }
+//            WCMethod.OKT_SIGN_TRANSACTION -> {
+//                val param = gson.fromJson<List<WCOKExChainTransaction>>(request.params)
+//                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onOktSignTransaction(request.id,param)
+//
+//            }
+//            WCMethod.BNB_TRANSACTION_CONFIRM -> {
+//                val param = gson.fromJson<List<WCBinanceTxConfirmParam>>(request.params)
+//                        .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onBnbTxConfirm(request.id, param)
+//            }
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(request.id)
             }
-            WCMethod.SIGN_TRANSACTION -> {
-                val param = gson.fromJson<List<WCSignTransaction>>(request.params)
-                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onSignTransaction(request.id, param)
-            }
+            else -> requestHandler(request.id, request)
+//            WCMethod.SIGN_TRANSACTION -> {
+//                val param = gson.fromJson<List<WCSignTransaction>>(request.params)
+//                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
+//                onSignTransaction(request.id, param)
+//            }
         }
     }
 
