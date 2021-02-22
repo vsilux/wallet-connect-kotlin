@@ -80,7 +80,7 @@ open class WCClient (
 //    var onSignTransaction: (id: Long, transaction: WCSignTransaction) -> Unit = {_, _ -> Unit }
 //    var onOktSignTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = {_,_->Unit }
 //    var onOktSendTransaction:(id:Long, transaction: WCOKExChainTransaction) -> Unit = { _, _->Unit }
-    var requestHandler: (id: Long, request: JsonRpcRequest<JsonArray>) -> Unit = { _, _->Unit }
+    var requestHandler: (id: Long, request: JsonRpcRequest<JsonArray>, payload: String) -> Unit = { _, _, _ -> Unit }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d(TAG, "<< websocket opened >>")
@@ -245,7 +245,7 @@ open class WCClient (
             val request = gson.fromJson<JsonRpcRequest<JsonArray>>(payload, typeToken<JsonRpcRequest<JsonArray>>())
             val method = request.method
             if (method != null) {
-                handleRequest(request)
+                handleRequest(request, payload)
             } else {
                 onCustomRequest(request.id, payload)
             }
@@ -254,7 +254,7 @@ open class WCClient (
         }
     }
 
-    private fun handleRequest(request: JsonRpcRequest<JsonArray>) {
+    private fun handleRequest(request: JsonRpcRequest<JsonArray>, payload: String) {
         when (request.method) {
             WCMethod.SESSION_REQUEST -> {
                 val param = gson.fromJson<List<WCSessionRequest>>(request.params)
@@ -336,7 +336,7 @@ open class WCClient (
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(request.id)
             }
-            else -> requestHandler(request.id, request)
+            else -> requestHandler(request.id, request, payload)
 //            WCMethod.SIGN_TRANSACTION -> {
 //                val param = gson.fromJson<List<WCSignTransaction>>(request.params)
 //                    .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
